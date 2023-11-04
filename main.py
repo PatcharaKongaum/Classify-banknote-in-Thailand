@@ -27,7 +27,7 @@ def display_color_results(green_pixel_count, blue_pixel_count, purple_pixel_coun
     color_label = tk.Label(root, text=color_result, font=("TH Sarabun New", 32))
     color_label.pack()
     os.system("start sound.wav")
-    root.after(1000, root.destroy)
+    root.after(2000, root.destroy)
 
     root.mainloop()
 
@@ -37,6 +37,7 @@ def capture_and_detect_color():
     ret, frame = cap.read()
     cv2.imwrite("captured_image.jpg", frame)
 
+    # ปิดกล้อง
     cap.release()
 
     detect_color_from_image('captured_image.jpg')
@@ -84,7 +85,7 @@ def detect_color_from_image(image_path):
 
     tts = gTTS(text=text_to_speak, lang='th')
     tts.save("output.mp3")
+    os.system("start captured_image.jpg")
     os.system("start output.mp3")
 
-# เริ่มต้นโปรแกรม
 capture_and_detect_color()
