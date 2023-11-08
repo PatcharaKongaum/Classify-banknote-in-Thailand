@@ -20,14 +20,17 @@ yellow_upper = (35, 255, 255)
 green_lower = (35, 50, 50)
 green_upper = (85, 255, 255)
 
-def display_color_results(green_pixel_count, blue_pixel_count, purple_pixel_count, red_pixel_count, yellow_pixel_count):
+def display_result_ui(green_pixel_count, blue_pixel_count, purple_pixel_count, red_pixel_count, yellow_pixel_count):
     root = tk.Tk()
-    root.title("Results")
-    color_result = f"สีที่ตรวจจับได้\nเขียว: {green_pixel_count}\nน้ำเงิน: {blue_pixel_count}\nม่วง: {purple_pixel_count}\nแดง: {red_pixel_count}\nเหลือง: {yellow_pixel_count}"
-    color_label = tk.Label(root, text=color_result, font=("TH Sarabun New", 32))
-    color_label.pack()
-    os.system("start sound.wav")
-    root.after(2000, root.destroy)
+    root.title("Result")
+
+    result_text = f"เขียว: {green_pixel_count}\nน้ำเงิน: {blue_pixel_count}\nม่วง: {purple_pixel_count}\nแดง: {red_pixel_count}\nเหลือง: {yellow_pixel_count}"
+    result_label = tk.Label(root, text=result_text, font=("TH Sarabun New", 20))
+    result_label.pack()
+
+    # สร้างปุ่มเพื่อรับคำสั่งหลังจากกด
+    recapture_button = tk.Button(root, text="ถ่ายรูปใหม่",font=("TH Sarabun New", 20), command=lambda: [root.destroy(), capture_and_detect_color()])
+    recapture_button.pack()
 
     root.mainloop()
 
@@ -35,12 +38,16 @@ def capture_and_detect_color():
     cap = cv2.VideoCapture(0)
 
     ret, frame = cap.read()
-    cv2.imwrite("captured_image.jpg", frame)
+    if ret:
+        cv2.imwrite("captured_image.jpg", frame)
+        cap.release()
+        detect_color_from_image('captured_image.jpg')
+    else:
+        cap.release()
+        os.system("start error.mp3")
+        print("Error: Could not capture an image. Please try again.")
+        starting()
 
-    # ปิดกล้อง
-    cap.release()
-
-    detect_color_from_image('captured_image.jpg')
 
 def detect_color_from_image(image_path):
     image = cv2.imread(image_path)
@@ -80,12 +87,17 @@ def detect_color_from_image(image_path):
     else:
         print("Error : Validation conditions not found.")
         text_to_speak = "Error : Validation conditions not found. ไม่พบรูปที่ตรงกับเงื่อนไข"
-
-    display_color_results(green_pixel_count, blue_pixel_count, purple_pixel_count, red_pixel_count, yellow_pixel_count)
-
+    print(f"เขียว: {green_pixel_count}\nน้ำเงิน: {blue_pixel_count}\nม่วง: {purple_pixel_count}\nแดง: {red_pixel_count}\nเหลือง: {yellow_pixel_count}")
     tts = gTTS(text=text_to_speak, lang='th')
     tts.save("output.mp3")
-    os.system("start captured_image.jpg")
     os.system("start output.mp3")
+    display_result_ui(green_pixel_count, blue_pixel_count, purple_pixel_count, red_pixel_count, yellow_pixel_count)
 
-capture_and_detect_color()
+def starting():
+    root = tk.Tk()
+    root.title("New Start")
+    capture_button = tk.Button(root, text="เริ่มต้นการทำงาน", font=("TH Sarabun New", 20), command=lambda: [root.destroy(), capture_and_detect_color()])
+    capture_button.pack()
+    root.mainloop()
+
+starting()
