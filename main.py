@@ -21,6 +21,10 @@ green_lower = (35, 50, 50)
 green_upper = (85, 255, 255)
 
 def display_result_ui(green_pixel_count, blue_pixel_count, purple_pixel_count, red_pixel_count, yellow_pixel_count):
+    def start_on_spacebar(event):
+        root.destroy()
+        capture_and_detect_color()
+
     root = tk.Tk()
     root.title("Result")
 
@@ -28,14 +32,16 @@ def display_result_ui(green_pixel_count, blue_pixel_count, purple_pixel_count, r
     result_label = tk.Label(root, text=result_text, font=("TH Sarabun New", 20))
     result_label.pack()
 
-    # สร้างปุ่มเพื่อรับคำสั่งหลังจากกด
-    recapture_button = tk.Button(root, text="ถ่ายรูปใหม่",font=("TH Sarabun New", 20), command=lambda: [root.destroy(), capture_and_detect_color()])
-    recapture_button.pack()
+    start_label = tk.Label(root, text="กด Spacebar เพื่อเริ่มต้นการทำงาน", font=("TH Sarabun New", 20))
+    start_label.pack()
+
+    # ผูกเหตุการณ์กดปุ่ม Spacebar กับฟังก์ชัน start_on_spacebar
+    root.bind("<space>", start_on_spacebar)
 
     root.mainloop()
 
 def capture_and_detect_color():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     ret, frame = cap.read()
     if ret:
@@ -47,7 +53,6 @@ def capture_and_detect_color():
         os.system("start error.mp3")
         print("Error: Could not capture an image. Please try again.")
         starting()
-
 
 def detect_color_from_image(image_path):
     image = cv2.imread(image_path)
@@ -69,7 +74,10 @@ def detect_color_from_image(image_path):
     green_pixel_count = cv2.countNonZero(mask_green)
 
     threshold = 1000
-    if green_pixel_count >= threshold:
+    if yellow_pixel_count >= threshold:
+        text_to_speak = "1000 บาท"
+        print("1000")
+    elif green_pixel_count >= threshold:
         text_to_speak = "20 บาท"
         print("20")
     elif red_pixel_count >= threshold:
@@ -81,9 +89,6 @@ def detect_color_from_image(image_path):
     elif purple_pixel_count >= threshold:
         text_to_speak = "500 บาท"
         print("500")
-    elif yellow_pixel_count >= threshold:
-        text_to_speak = "1000 บาท"
-        print("1000")
     else:
         print("Error : Validation conditions not found.")
         text_to_speak = "Error : Validation conditions not found. ไม่พบรูปที่ตรงกับเงื่อนไข"
@@ -94,10 +99,19 @@ def detect_color_from_image(image_path):
     display_result_ui(green_pixel_count, blue_pixel_count, purple_pixel_count, red_pixel_count, yellow_pixel_count)
 
 def starting():
+    def start_on_spacebar(event):
+        root.destroy()
+        capture_and_detect_color()
+
     root = tk.Tk()
     root.title("New Start")
-    capture_button = tk.Button(root, text="เริ่มต้นการทำงาน", font=("TH Sarabun New", 20), command=lambda: [root.destroy(), capture_and_detect_color()])
-    capture_button.pack()
+
+    start_label = tk.Label(root, text="กด Spacebar เพื่อเริ่มต้นการทำงาน", font=("TH Sarabun New", 20))
+    start_label.pack()
+
+    # ผูกเหตุการณ์กดปุ่ม Spacebar กับฟังก์ชัน start_on_spacebar
+    root.bind("<space>", start_on_spacebar)
+
     root.mainloop()
 
 starting()
